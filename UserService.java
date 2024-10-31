@@ -1,241 +1,120 @@
-// package com.example.RBD.Service;
-
-// import java.util.*;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.autoconfigure.SpringBootApplication;
-// import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
-// import org.springframework.data.jpa.repository.JpaRepository;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
-// //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-// import org.springframework.stereotype.Service;
-// import com.example.RBD.Repository.UserRepo;
-// import com.example.RBD.Repository.AddRepo;
-// import com.example.RBD.Repository.RoleRepo;
-// import com.example.RBD.DTO.LoginRequest;
-// import com.example.RBD.DTO.LoginResponse;
-// import com.example.RBD.DTO.RegisterUser;
-// import com.example.RBD.Entity.*;
-
-// @SpringBootApplication(scanBasePackages = { "com.example.RBD" })
-// @Service
-// public class UserService {
-
-//     @Autowired
-//     private UserRepo userRepository;
-
-//     @Autowired
-//     private AddRepo addRepository;
-
-//     @Autowired
-//     private RoleRepo rr;
-
-//     public UserEntity addUserWithAddresses(UserEntity user, List<AddEntity> addresses) {
-//         for (AddEntity address : addresses) {
-//             address.setUser(user);
-//         }
-//         user.setAddresses(addresses);
-//         return userRepository.save(user);
-//     }
-
-//     public UserEntity addUserWithRole(UserEntity user, Set<RoleEntity> roles) {
-//         for (RoleEntity role : roles) {
-//             role.addUsers(user);
-//         }
-//         user.setRoles(roles);
-//         return userRepository.save(user);
-
-//     }
-
-//     public UserEntity registerUserWithRoles(RegisterUser request) {
-//         UserEntity user = new UserEntity();
-//         user.setUsername(request.getUsername());
-//         user.setUseremail(request.getUseremail());
-//         user.setUserpass(encryptPassword(request.getUserpass()));
-
-//         Set<RoleEntity> roles = new HashSet<>();
-//         for (String r_Name : request.getRoles()) {
-//             RoleEntity role = rr.findByRoleName(r_Name)
-//                     .orElseThrow(() -> new RuntimeException("Role not found: " + r_Name));
-//             roles.add(role); // Add the RoleEntity to the roles set
-
-//         }
-//         user.setRoles(roles); // Set the roles in the user entity
-
-//         return userRepository.save(user);
-//     }
-
-//     public UserEntity registerUser(UserEntity user) {
-//         if (userRepository.findByUseremail(user.getUseremail()).isPresent()) {
-//             throw new RuntimeException("Email already exists!");
-//         }
-//         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-//             throw new RuntimeException("Username already exists!");
-//         }
-
-//         user.setUserpass(encryptPassword(user.getUserpass()));
-//         return userRepository.save(user);
-//     }
-
-//     public LoginResponse loginUser(LoginRequest loginRequest) {
-//         System.out.println("Received username: " + loginRequest.getUsername());
-//         System.out.println("Received password: " + loginRequest.getUserpass());
-
-//         Optional<UserEntity> userOpt = userRepository.findByUsername(loginRequest.getUsername());
-
-//         if (userOpt.isPresent()) {
-//             UserEntity user = userOpt.get();
-//             if (checkPassword(loginRequest.getUserpass(), user.getUserpass())) {
-//                 return new LoginResponse("Login successful", true);
-//             } else {
-//                 return new LoginResponse("Invalid password", false);
-//             }
-//         }
-//         return new LoginResponse("User not found", false);
-//     }
-
-//     // Encryption method (You can add password encryption logic here)
-//     private String encryptPassword(String password) {
-//         return password; // In real case, use something like BCrypt to encrypt the password
-//     }
-
-//     // Simplified password check method
-//     private boolean checkPassword(String rawPassword, String encryptedPassword) {
-//         // Null check for the raw password
-//         if (rawPassword == null) {
-//             throw new IllegalArgumentException("Password cannot be null");
-//         }
-
-//         // In case you want to do actual encrypted password comparison, use an encoder
-//         // For now, it's just a plain text comparison
-//         return rawPassword.equals(encryptedPassword);
-//     }
-// }
-
 package com.example.RBD.Service;
 
 import java.util.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.stereotype.Service;
-import com.example.RBD.Repository.UserRepo;
-import com.example.RBD.Repository.RoleRepo;
-import com.example.RBD.DTO.LoginRequest;
-import com.example.RBD.DTO.LoginResponse;
-import com.example.RBD.DTO.RegisterUser;
-import com.example.RBD.Entity.*;
 
-@SpringBootApplication(scanBasePackages = { "com.example.RBD" })
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.RBD.Entity.AddressEntity;
+import com.example.RBD.Entity.RoleEnity;
+import com.example.RBD.Entity.UserEntity;
+import com.example.RBD.Entity.UserRole;
+import com.example.RBD.Repository.RoleRepo;
+import com.example.RBD.Repository.UserRepo;
+import com.example.RBD.Repository.UserRoleRepository;
+
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserService {
 
     @Autowired
-    private UserRepo userRepository;
+    private UserRepo userRepo;
 
     @Autowired
-    private RoleRepo rr;
+    private RoleRepo roleRepo;
 
-    public UserEntity addUserWithAddresses(UserEntity user, List<AddEntity> addresses) {
+    // public void createUserWithDetails(UserEntity user, List<AddEntity> addresses,
+    // Set<RoleEntity> role) {
+    // user.setAddresses(addresses); // Set addresses for the user
+    // // user.setRole(role); // Set roles for the user
 
-        if (user == null) {
-            throw new IllegalArgumentException("User entity cannot be null");
-        }
+    // RoleEntity adminRole = new RoleEntity();
+    // adminRole.setRid(1L);
+    // adminRole.setRname("Admin");
 
-        for (AddEntity address : addresses) {
-            address.setUser(user);
-        }
+    // RoleEntity userRole = new RoleEntity();
+    // userRole.setRid(2L);
+    // userRole.setRname("User");
+
+    // user.getRole().add(adminRole);
+    // user.getRole().add(userRole);
+    // userRepo.save(user); // Save the user (addresses and roles will be saved
+    // automatically)
+
+    // }
+    public void createUserWithDetails(UserEntity user, List<AddressEntity> addresses) {
         user.setAddresses(addresses);
-        return userRepository.save(user);
+
+        // if (user.getRole() == null) {
+        // user.setRole(new HashSet<>());
+        // }
+
+        // Add roles to the user
+        // user.getRole().add(adminRole);
+        // user.getRole().add(userRole);
+
+        // Set<RoleEntity> roles = new HashSet<>();
+        // RoleEntity adminRole = roleRepo.findByRname("Admin");
+        // RoleEntity userRole = roleRepo.findByRname("User");
+
+        // // If roles are not found, you might want to create them
+        // if (adminRole == null) {
+        // adminRole = new RoleEntity();
+        // adminRole.setRname("Admin");
+        // roleRepo.save(adminRole); // Persist the new role
+        // }
+
+        // if (userRole == null) {
+        // userRole = new RoleEntity();
+        // userRole.setRname("User");
+        // roleRepo.save(userRole); // Persist the new role
+        // }
+
+        // // Add roles to the user
+        // roles.add(adminRole);
+        // roles.add(userRole);
+        // user.setRole(roles);
+
+        userRepo.save(user);
     }
 
-    // public UserEntity addUserWithRole(UserEntity user, Set<RoleEntity> roles) {
-    // if (user == null) {
-    // throw new IllegalArgumentException("User entity cannot be null");
-    // }
+    @Transactional
+    public UserEntity saveUser(UserEntity user) {
+        if (user.getAddresses() != null) {
 
-    // for (RoleEntity role : roles) {
-    // role.addUsers(user);
-    // }
-    // user.setRoles(roles);
-    // return userRepository.save(user);
-    // }
-
-    // public UserEntity registerUserWithRoles(RegisterUser request) {
-    // if (userRepository.findByUseremail(request.getUseremail()).isPresent()) {
-    // throw new RuntimeException("Email already exists!");
-    // }
-    // if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-    // throw new RuntimeException("Username already exists!");
-    // }
-
-    // UserEntity user = new UserEntity();
-    // user.setUsername(request.getUsername());
-    // user.setUseremail(request.getUseremail());
-    // user.setUserpass(encryptPassword(request.getUserpass()));
-
-    // Set<RoleEntity> roles = new HashSet<>();
-    // for (String rname : request.getRoles()) {
-    // RoleEntity role = rr.findByrname(rname)
-    // .orElseThrow(() -> new RuntimeException("Role not found: " + rname));
-    // roles.add(role);
-    // }
-    // user.setRoles(roles);
-
-    // return userRepository.save(user);
-    // }
-
-    // public UserEntity registerUser(UserEntity user) {
-    // if (userRepository.findByUseremail(user.getUseremail()).isPresent()) {
-    // throw new RuntimeException("Email already exists!");
-    // }
-    // if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-    // throw new RuntimeException("Username already exists!");
-    // }
-
-    // user.setUserpass(encryptPassword(user.getUserpass()));
-    // return userRepository.save(user);
-    // }
-
-    public LoginResponse loginUser(LoginRequest loginRequest) {
-        Optional<UserEntity> userOpt = userRepository.findByUsername(loginRequest.getUsername());
-
-        if (userOpt.isPresent()) {
-            UserEntity user = userOpt.get();
-            if (checkPassword(loginRequest.getUserpass(), user.getUserpass())) {
-                return new LoginResponse("Login successful", true);
-            } else {
-                return new LoginResponse("Invalid password", false);
+            for (AddressEntity address : user.getAddresses()) {
+                address.setUser(user); // Set the user reference in each address
             }
         }
-        return new LoginResponse("User not found", false);
+
+        // if (user.getRole() != null) {
+        // for (RoleEnity role : user.getRole()) {
+        // role.setRname(role.getRname()); // Ensure rname is populated
+        // }
+        // }
+        return userRepo.save(user);
     }
 
-    private String encryptPassword(String password) {
-        return password; // Placeholder for actual encryption logic
+    @Autowired
+    private UserRoleRepository userRoleRepository;
+
+    public void assignRoleToUser(Long userId, Long roleId) {
+        UserEntity user = userRepo.findById(userId).orElseThrow();
+        RoleEnity role = roleRepo.findById(roleId).orElseThrow();
+
+        UserRole userRole = new UserRole(user, role);
+        userRole.setUser(user);
+        userRole.setRole(role);
+
+        userRoleRepository.save(userRole);
     }
 
-    private boolean checkPassword(String rawPassword, String encryptedPassword) {
-        if (rawPassword == null) {
-            throw new IllegalArgumentException("Password cannot be null");
-        }
-        return rawPassword.equals(encryptedPassword);
+    public List<UserEntity> findAllUsers() {
+        return userRepo.findAll();
     }
 
-    public UserEntity saveUser(UserEntity user) {
-        // Check if user fields (like email or username) already exist to prevent
-        // duplicates, if necessary
-        if (userRepository.findByUseremail(user.getUseremail()).isPresent()) {
-            throw new RuntimeException("Email already exists!");
-        }
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already exists!");
-        }
-
-        // Encrypt the password before saving (replace with your actual encryption logic
-        // if available)
-        user.setUserpass(encryptPassword(user.getUserpass()));
-
-        // Save the user entity to the database
-        return userRepository.save(user);
+    public List<UserEntity> getAllUsers() {
+        return userRepo.findAll();
     }
 }

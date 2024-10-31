@@ -1,129 +1,89 @@
+package com.example.RBD.Controller;
+
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.*;
+
+import com.example.RBD.Entity.RoleEnity;
+import com.example.RBD.Entity.UserEntity;
+import com.example.RBD.Entity.UserRole;
+import com.example.RBD.Repository.UserRepo;
+import com.example.RBD.Service.RoleService;
+import com.example.RBD.Service.UserService;
+
 // import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.web.bind.annotation.*;
 
-// @RestController
-// @RequestMapping("/api/users")
-// public class UserController {
-
-//     @Autowired
-//     private UserService userService;
-
-//     @PostMapping("register")
-//     public User registerUser(@RequestBody UserEntity user) {
-//         return userService.registerUser(user);
-//     }
-
-//     @PostMapping("login")
-//     public LoginResponse loginUser(@RequestBody LoginRequest loginRequest) {
-//         return userService.loginUser(user);
-//     }
-// }
-package com.example.RBD.Controller;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-//import java.util.List;
-
-import com.example.RBD.Entity.AddEntity;
-import com.example.RBD.Entity.RoleEntity;
-//import com.example.RBD.Entity.AddEntity;
-import com.example.RBD.Entity.UserEntity;
-import com.example.RBD.Service.UserService;
-import com.example.RBD.DTO.LoginRequest;
-import com.example.RBD.DTO.LoginResponse;
-import com.example.RBD.DTO.RegisterUser;
-
-import java.util.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-import com.example.RBD.Repository.UserRepo;
-import com.example.RBD.Repository.RoleRepo;
-import com.example.RBD.DTO.LoginRequest;
-import com.example.RBD.DTO.LoginResponse;
-import com.example.RBD.DTO.RegisterUser;
-import com.example.RBD.Entity.*;
-
 @RestController
-@CrossOrigin(origins = "http://localhost:5175")
 @RequestMapping("/api/users")
+
 public class UserController {
 
     @Autowired
     private UserService userService;
-    private RoleRepo rr;
 
-    @PostMapping("/register")
-    public UserEntity registerUser(@RequestBody RegisterUser request) {
-        UserEntity user = new UserEntity();
-        user.setUsername(request.getUsername());
-        user.setUseremail(request.getUseremail());
-        user.setUserpass((request.getUserpass()));
+    @Autowired
+    private RoleService roleService;
 
-        // Set roles
-        // Set<RoleEntity> roles = new HashSet<>();
-        // for (String rname : request.get) {
-        // RoleEntity role = rr.findByrname(rname) // Use findByrname if your column is
-        // named "rname"
-        // .orElseThrow(() -> new RuntimeException("Role not found: " + rname));
-        // roles.add(role);
+    @Autowired
+    private UserRepo userRepo;
+
+    @PostMapping
+    public UserEntity createUser(@RequestBody UserEntity user) {
+        // userService.createUserWithDetails(user, user.getAddresses());
+
+        // Add roles to the user
+        // user.getRole().add(adminRole);
+        // user.getRole().add(userRole);
+
+        // RoleEnity enity = new RoleEnity();
+        // enity.setRoleId(1);
+        // enity.setRoleName("Admin");
+
+        // roleService.saveRole(enity);
+        // return userService.saveUser(user);
+
+        // Set<RoleEnity> resolvedRoles = new HashSet<>();
+
+        // for (UserRole role : user.getUserRoles()) {
+        // RoleEnity existingRole = roleService.findRoleByName(role.getRoleName());
+        // if (existingRole != null) {
+        // resolvedRoles.add(existingRole);
+        // } else {
+        // // Optionally create a new role if it doesn't exist
+        // RoleEnity newRole = new RoleEnity();
+        // newRole.setRoleName(role.getRoleName());
+        // resolvedRoles.add(roleService.saveRole(newRole));
         // }
-        // user.setRoles(roles);
+        // }
 
-        // Set addresses
-        for (AddEntity address : request.getAddress()) {
-            address.setUser(user);
+        // // Set resolved roles in the UserEntity
+        // user.setUserRoles(resolvedRoles);
+        // // UserEntity createdUser = userService.saveUser(user);
+        // // return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        // return userRepo.save(user);
+
+        Set<RoleEnity> roleEnities = new HashSet<>();
+
+        for (RoleEnity role : user.getUserRoles()) {
+            RoleEnity roleEnity = new RoleEnity();
+
+            roleEnity.setRoleName(role.getRoleName());
+            roleEnities.add(roleEnity);
         }
-        user.setAddresses(request.getAddress());
 
-        return userService.saveUser(user); // Assuming a saveUser method in UserService
+        user.setUserRoles(roleEnities);
+        return userService.saveUser(user);
     }
 
-    // private String encryptPassword(String userpass) {
-    // // TODO Auto-generated method stub
-    // // return new BCryptPasswordEncoder().encode(userpass);
-    // // throw new UnsupportedOperationException("Unimplemented method
-    // encryptPassword'");
-    // }
-
-    @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
-    public LoginResponse loginUser(@RequestBody LoginRequest loginRequest) {
-        return userService.loginUser(loginRequest);
+    @GetMapping
+    public List<UserEntity> getAllUsers() {
+        return userService.getAllUsers();
     }
 }
-
-// @PostMapping("/register")
-// public UserEntity registerUser(@RequestBody UserEntity user, @RequestBody
-// List<AddEntity> addresses) {
-// UserEntity createdUser = userService.addUserWithAddresses(user, addresses);
-
-// return userService.registerUser(user);
-// }
-
-// @PostMapping("/register")
-// public UserEntity registerUser(@RequestBody RegisterUser rr) {
-// UserEntity user = new UserEntity();
-// user.setUsername(rr.getUsername());
-// user.setUseremail(rr.getUseremail());
-// user.setUserpass(encryptPassword(rr.getUserpass()));
-
-// // Set roles
-// Set<RoleEntity> roles = new HashSet<>();
-// for (String rname : rr.getRoles()) {
-// RoleEntity role = rr.findByrname(rname)
-// .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
-// roles.add(role);
-// }
-// user.setRoles(roles);
-
-// // Set addresses
-// for (AddEntity address : rr.getAdd()) {
-// address.setUser(user);
-// }
-// user.setAddresses(registrationRequest.getAddresses());
-
-// return userService.saveUser(user);
-// }
-
-// @PostMapping("/login")

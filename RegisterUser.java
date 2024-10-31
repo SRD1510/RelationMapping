@@ -1,7 +1,7 @@
 package com.example.RBD.DTO;
 
 import com.example.RBD.Entity.UserEntity;
-import com.example.RBD.Entity.AddEntity;
+import com.example.RBD.Entity.AddressEntity;
 import java.util.*;
 
 //import org.antlr.v4.runtime.misc.NotNull;
@@ -9,7 +9,7 @@ import java.util.*;
 public class RegisterUser {
 
     private UserEntity user;
-    private List<AddEntity> address;
+    private List<AddressEntity> address;
     private String username;
     private String useremail;
     private String userpass;
@@ -56,16 +56,15 @@ public class RegisterUser {
         this.user = user;
     }
 
-    public List<AddEntity> getAddress() {
+    public List<AddressEntity> getAddress() {
         return address;
     }
 
-    public void setAddress(List<AddEntity> address) {
+    public void setAddress(List<AddressEntity> address) {
         this.address = address;
     }
 
     public Object findByrname(String rname) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findByrname'");
     }
 

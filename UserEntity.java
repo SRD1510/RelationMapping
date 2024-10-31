@@ -1,48 +1,40 @@
 package com.example.RBD.Entity;
 
-//import org.hibernate.mapping.List;
 import java.util.*;
 
-//import com.fasterxml.jackson.databind.ser.std.StdArraySerializers.LongArraySerializer;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
-public class UserEntity {
 
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    // @JoinColumn(name = "add_id")
-
-    @ElementCollection
-    private List<AddEntity> addresses = new ArrayList<>();
-    @Column(nullable = false, unique = true)
     private String username;
-    @Column(nullable = false)
     private String useremail;
-    @Column(nullable = false)
     private String userpass;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "roles", joinColumns = @JoinColumn(name = "id"), inverseJoinColumns = @JoinColumn(name = "r_id"))
-
-    private Set<RoleEntity> roles = new HashSet<>();
-
-    @Column(nullable = false)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<AddressEntity> addresses;
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<RoleEnity> userRoles = new HashSet<>();
+
+    public Set<RoleEnity> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Set<RoleEnity> userRoles) {
+        this.userRoles = userRoles;
+    }
 
     public Long getId() {
         return id;
-    }
-
-    public Set<RoleEntity> getRole() {
-        return roles;
-    }
-
-    public void setRole(Set<RoleEntity> role) {
-        this.roles = role;
     }
 
     public void setId(Long id) {
@@ -73,32 +65,12 @@ public class UserEntity {
         this.userpass = userpass;
     }
 
-    public List<AddEntity> getAddresses() {
+    public List<AddressEntity> getAddresses() {
         return addresses;
     }
 
-    public void setAddresses(List<AddEntity> addresses) {
+    public void setAddresses(List<AddressEntity> addresses) {
         this.addresses = addresses;
-    }
-
-    public Set<RoleEntity> getRoles() {
-
-        if (roles == null) {
-            roles = new HashSet<>();
-        }
-        return roles;
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'getRoles'");
-    }
-
-    public void setRoles(Set<RoleEntity> roles) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setRoles'");
-    }
-
-    public void addRole(RoleEntity role) {
-        this.roles.add(role);
-        role.getUsers().add(this); // Maintain bidirectional relationship
     }
 
 }
